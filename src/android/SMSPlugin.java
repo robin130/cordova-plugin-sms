@@ -227,22 +227,7 @@ extends CordovaPlugin {
             callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, "SMS is not supported"));
         }
         return null;
-    }
-    private static String createRegexFromGlob(String glob) {
-        StringBuilder out = new StringBuilder("^");
-        for(int i = 0; i < glob.length(); ++i) {
-            final char c = glob.charAt(i);
-            switch(c) {
-                case '*': out.append(".*"); break;
-                case '?': out.append('.'); break;
-                case '.': out.append("\\."); break;
-                case '\\': out.append("\\\\"); break;
-                default: out.append(c);
-            }
-        }
-        out.append('$');
-        return out.toString();
-    }
+    }    
     private PluginResult listSMS(JSONObject filter, CallbackContext callbackContext) {
         Log.i(LOGTAG, ACTION_LIST_SMS);
         String uri_filter = filter.has(BOX) ? filter.optString(BOX) : "inbox";
@@ -269,7 +254,7 @@ extends CordovaPlugin {
             } else if (fcontent.length() > 0) {
                 String patterrString = this.createRegexFromGlob(fcontent);
                 String msgBodyString = (cur.getString(cur.getColumnIndex(BODY)).trim());
-                matchFilter = fcontent.matches(msgBodyString.replaceAll("[()]", ""));
+                matchFilter = msgBodyString.indexOf(fcontent) != -1;
             } else {
                 matchFilter = true;
             }
