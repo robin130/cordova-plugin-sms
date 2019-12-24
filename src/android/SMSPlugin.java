@@ -228,7 +228,21 @@ extends CordovaPlugin {
         }
         return null;
     }
-
+    private static String createRegexFromGlob(String glob) {
+        StringBuilder out = new StringBuilder("^");
+        for(int i = 0; i < glob.length(); ++i) {
+            final char c = glob.charAt(i);
+            switch(c) {
+                case '*': out.append(".*"); break;
+                case '?': out.append('.'); break;
+                case '.': out.append("\\."); break;
+                case '\\': out.append("\\\\"); break;
+                default: out.append(c);
+            }
+        }
+        out.append('$');
+        return out.toString();
+    }
     private PluginResult listSMS(JSONObject filter, CallbackContext callbackContext) {
         Log.i(LOGTAG, ACTION_LIST_SMS);
         String uri_filter = filter.has(BOX) ? filter.optString(BOX) : "inbox";
@@ -253,15 +267,16 @@ extends CordovaPlugin {
             } else if (faddress.length() > 0) {
                 matchFilter = PhoneNumberUtils.compare(faddress, cur.getString(cur.getColumnIndex(ADDRESS)).trim());
             } else if (fcontent.length() > 0) {
-                matchFilter = fcontent.equals(cur.getString(cur.getColumnIndex(BODY)).trim());
+                String patterrString = this.createRegexFromGlob(fcontent);
+                matchFilter = fcontent.matches(cur.getString(cur.getColumnIndex(BODY)).trim());
             } else {
                 matchFilter = true;
             }
             if (! matchFilter) continue;
             
-            if (i < indexFrom) continue;
-            if (i >= indexFrom + maxCount) break;
             ++i;
+            if (i <= indexFrom) continue;
+            if (i > indexFrom + maxCount) break;
 
             if ((json = this.getJsonFromCursor(cur)) == null) {
                 callbackContext.error("failed to get json from cursor");
