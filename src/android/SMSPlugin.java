@@ -252,8 +252,7 @@ extends CordovaPlugin {
             } else if (faddress.length() > 0) {
                 matchFilter = PhoneNumberUtils.compare(faddress, cur.getString(cur.getColumnIndex(ADDRESS)).trim());
             } else if (fcontent.length() > 0) {
-                String patterrString = this.createRegexFromGlob(fcontent);
-                String msgBodyString = (cur.getString(cur.getColumnIndex(BODY)).trim());
+                String msgBodyString = cur.getString(cur.getColumnIndex(BODY)).trim();
                 matchFilter = msgBodyString.indexOf(fcontent) != -1;
             } else {
                 matchFilter = true;
